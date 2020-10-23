@@ -195,6 +195,46 @@ wgs_wts$X3=str_replace(wgs_wts$X3,"^PhoR PhoB Inhibitor Protein","PhoU Phosphate
 
 
 ### Individual barplot
+scaleFUN <- function(x) sprintf("%.1f", x)
+set_panel_size <- function(p = NULL, g = ggplotGrob(p),
+                           file = NULL, margin = unit(1, "mm"), width = unit(4,
+                                                                             "cm"), height = unit(4, "cm")) {
+    
+    panels <- grep("panel", g$layout$name)
+    panel_index_w <- unique(g$layout$l[panels])
+    panel_index_h <- unique(g$layout$t[panels])
+    nw <- length(panel_index_w)
+    nh <- length(panel_index_h)
+    
+    if (getRversion() < "3.3.0") {
+        
+        # the following conversion is necessary because
+        # there is no `[<-`.unit method so promoting to
+        # unit.list allows standard list indexing
+        g$widths <- grid:::unit.list(g$widths)
+        g$heights <- grid:::unit.list(g$heights)
+        
+        g$widths[panel_index_w] <- rep(list(width),
+                                       nw)
+        g$heights[panel_index_h] <- rep(list(height),
+                                        nh)
+        
+    } else {
+        
+        g$widths[panel_index_w] <- rep(width, nw)
+        g$heights[panel_index_h] <- rep(height, nh)
+        
+    }
+    
+    if (!is.null(file))
+        ggsave(file, g, width = convertWidth(sum(g$widths) +
+                                                 margin, unitTo = "in", valueOnly = TRUE),
+               height = convertHeight(sum(g$heights) +
+                                          margin, unitTo = "in", valueOnly = TRUE))
+    
+    g
+}
+
 #osmoregulation
 pal<-iwanthue(112)
 a10<-ggplot(wgs_wts[grep("Osmoregulation",wgs_wts$X2), ],col=pal, aes(sample, values, fill = taxac)) +
@@ -206,8 +246,8 @@ a10<-ggplot(wgs_wts[grep("Osmoregulation",wgs_wts$X2), ],col=pal, aes(sample, va
     legend.text=element_text(size=16),axis.text.y=element_text(size=15),plot.title = element_text(face = 'bold', size = 20,hjust=0.5),
     strip.text.x = element_text(size = 18, color ="black" ),strip.text.y = element_text(size = 18, color ="black" ),
     panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-    guides(fill=guide_legend(ncol=1))+ labs(title = "Osmoregulation", x = "Sites", y = "RPM (WGS) or RPKM (WTS)")
-p10=set_panel_size(a10,width = unit(5.5, "cm"),height = unit(5.5, "cm"))
+    guides(fill=guide_legend(ncol=1))+ labs(title = "Osmoregulation", x = "Sites", y = "RPKM")
+p10=set_panel_size(a10,width = unit(5.5, "cm"),height = unit(4.5, "cm"))
 
 #photosynthesis
 pal<-iwanthue(24)
@@ -220,7 +260,7 @@ a1<-ggplot(wgs_wts[grep("Photosynthesis",wgs_wts$X2), ],col=pal, aes(sample, val
     legend.text=element_text(size=16),axis.text.y=element_text(size=15),plot.title = element_text(face = 'bold', size = 20,hjust=0.5),
     strip.text.x = element_text(size = 18, color ="black" ),strip.text.y = element_text(size = 18, color ="black" ),
     panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-    guides(fill=guide_legend(ncol=1))+ labs(title = "Photosynthesis", x = "Sites", y = "RPM (WGS) or RPKM (WTS)")
+    guides(fill=guide_legend(ncol=1))+ labs(title = "Photosynthesis", x = "Sites", y = "RPKM")
 p1=set_panel_size(a1,width = unit(5.5, "cm"),height = unit(5.5, "cm"))
 
 #carbon
@@ -234,7 +274,7 @@ a2<-ggplot(wgs_wts[grep("Carbon fixation",wgs_wts$X2), ],col=pal, aes(sample, va
     legend.text=element_text(size=16),axis.text.y=element_text(size=15),plot.title = element_text(face = 'bold', size = 20,hjust=0.5),
     strip.text.x = element_text(size = 18, color ="black" ),strip.text.y = element_text(size = 18, color ="black" ),
     panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-    guides(fill=guide_legend(ncol=1))+ labs(title = "Carbon fixation", x = "Sites", y = "RPM (WGS) or RPKM (WTS)")
+    guides(fill=guide_legend(ncol=1))+ labs(title = "Carbon fixation", x = "Sites", y = "RPKM")
 p2=set_panel_size(a2,width = unit(5.5, "cm"),height = unit(5.5, "cm"))
 
 #nitrogen_nitrification
@@ -249,7 +289,7 @@ a3<-ggplot(v[grepl("Cyanophycin|fixation",v$X3), ],col=pal, aes(sample, values, 
     legend.text=element_text(size=16),axis.text.y=element_text(size=15),plot.title = element_text(face = 'bold', size = 20,hjust=0.5),
     strip.text.x = element_text(size = 18, color ="black" ),strip.text.y = element_text(size = 18, color ="black" ),
     panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-    guides(fill=guide_legend(ncol=1))+ labs(title = "Nitrogen", x = "Sites", y = "RPM (WGS) or RPKM (WTS)")
+    guides(fill=guide_legend(ncol=1))+ labs(title = "Nitrogen", x = "Sites", y = "RPKM")
 p3=set_panel_size(a3,width = unit(5.5, "cm"),height = unit(5.5, "cm"))
 
 a4<-ggplot(v[grepl("Ammonia|Complete|Nitrite oxidation",v$X3), ],col=pal, aes(sample, values, fill = taxac)) +
@@ -261,7 +301,7 @@ a4<-ggplot(v[grepl("Ammonia|Complete|Nitrite oxidation",v$X3), ],col=pal, aes(sa
     legend.text=element_text(size=16),axis.text.y=element_text(size=15),plot.title = element_text(face = 'bold', size = 20,hjust=0.5),
     strip.text.x = element_text(size = 18, color ="black" ),strip.text.y = element_text(size = 18, color ="black" ),
     panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-    guides(fill=guide_legend(ncol=1))+ labs(title = "Nitrification", x = "Sites", y = "RPM (WGS) or RPKM (WTS)")
+    guides(fill=guide_legend(ncol=1))+ labs(title = "Nitrification", x = "Sites", y = "RPKM")
 p4=set_panel_size(a4,width = unit(5.5, "cm"),height = unit(5.5, "cm"))
 
 a5<-ggplot(v[grepl("Nitrite reduction|DNRA|Nitrate reduction|Nitric oxide|Nitrous oxide|Nitrite reduction",v$X3), ],col=pal, 
@@ -274,7 +314,7 @@ a5<-ggplot(v[grepl("Nitrite reduction|DNRA|Nitrate reduction|Nitric oxide|Nitrou
     legend.text=element_text(size=16),axis.text.y=element_text(size=15),plot.title = element_text(face = 'bold', size = 20,hjust=0.5),
     strip.text.x = element_text(size = 18, color ="black" ),strip.text.y = element_text(size = 18, color ="black" ),
     panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-    guides(fill=guide_legend(ncol=1))+ labs(title = "DNRA/Denitrification", x = "Sites", y = "RPM (WGS) or RPKM (WTS)")
+    guides(fill=guide_legend(ncol=1))+ labs(title = "DNRA/Denitrification", x = "Sites", y = "RPKM")
 p5=set_panel_size(a5,width = unit(5.5, "cm"),height = unit(5.5, "cm"))
 
 #phosphorus
@@ -289,12 +329,12 @@ a6<-ggplot(wgs_wts[grep("Phosphatase|Phosphate Inorganic Transporter|Phosphate R
     legend.text=element_text(size=16),axis.text.y=element_text(size=15),plot.title = element_text(face = 'bold', size = 20,hjust=0.5),
     strip.text.x = element_text(size = 18, color ="black" ),strip.text.y = element_text(size = 18, color ="black" ),
     panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-    guides(fill=guide_legend(ncol=1))+ labs(title = "Phosphorus", x = "Sites", y = "RPM (WGS) or RPKM (WTS)")
+    guides(fill=guide_legend(ncol=1))+ labs(title = "Phosphorus", x = "Sites", y = "RPKM")
 p6=set_panel_size(a6,width = unit(5.5, "cm"),height = unit(5.5, "cm"))
 
 #sulfur
 pal<-iwanthue(88)
-a7<-ggplot(wgs_wts[grep("Sulfate reduction|sulfite reduction",wgs_wts$X3), ],col=pal, aes(sample, values, fill = taxac)) +
+a7<-ggplot(wgs_wts[grep("Sulfate reduction|Sulfite reduction",wgs_wts$X3), ],col=pal, aes(sample, values, fill = taxac)) +
     theme_bw()  +
     geom_bar(position="stack", stat="identity") +
     facet_grid( X3~place , scales = "free_y",labeller = label_wrap_gen(width=15))+
@@ -303,7 +343,7 @@ a7<-ggplot(wgs_wts[grep("Sulfate reduction|sulfite reduction",wgs_wts$X3), ],col
     legend.text=element_text(size=16),axis.text.y=element_text(size=15),plot.title = element_text(face = 'bold', size = 20,hjust=0.5),
     strip.text.x = element_text(size = 18, color ="black" ),strip.text.y = element_text(size = 18, color ="black" ),
     panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-    guides(fill=guide_legend(ncol=1))+ labs(title = "Sulfate and sulfite reduction", x = "Sites", y = "RPM (WGS) or RPKM (WTS)")
+    guides(fill=guide_legend(ncol=1))+ labs(title = "Sulfate and sulfite reduction", x = "Sites", y = "RPKM")
 p7=set_panel_size(a7,width = unit(5.5, "cm"),height = unit(5.5, "cm"))
 
 pal<-iwanthue(88)
@@ -316,7 +356,7 @@ a8<-ggplot(wgs_wts[grep("Sulfide oxidation|Sulfur oxidation|ThioSulfate",wgs_wts
     legend.text=element_text(size=16),axis.text.y=element_text(size=15),plot.title = element_text(face = 'bold', size = 20,hjust=0.5),
     strip.text.x = element_text(size = 18, color ="black" ),strip.text.y = element_text(size = 18, color ="black" ),
     panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-    guides(fill=guide_legend(ncol=1))+ labs(title = "Sulfur, sulfide and thiosulfate oxidation", x = "Sites", y = "RPM (WGS) or RPKM (WTS)")
+    guides(fill=guide_legend(ncol=1))+ labs(title = "Sulfur, sulfide and thiosulfate oxidation", x = "Sites", y = "RPKM")
 p8=set_panel_size(a8,width = unit(5.5, "cm"),height = unit(5.5, "cm"))
 
 ##dsr rdsr
@@ -331,7 +371,7 @@ a9<-ggplot(v[grep("dsr",v$X4), ],col=pal, aes(sample, values, fill = taxac)) +
     legend.text=element_text(size=16),axis.text.y=element_text(size=15),plot.title = element_text(face = 'bold', size = 20,hjust=0.5),
     strip.text.x = element_text(size = 18, color ="black" ),strip.text.y = element_text(size = 18, color ="black" ),
     panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-    guides(fill=guide_legend(ncol=1))+ labs(title = "Sulfite reduction and sulfur oxidation", x = "Sites", y = "RPM (WGS) or RPKM (WTS)")
+    guides(fill=guide_legend(ncol=1))+ labs(title = "Sulfite reduction and sulfur oxidation", x = "Sites", y = "RPKM")
 p9=set_panel_size(a9,width = unit(5.5, "cm"),height = unit(5.5, "cm"))
 
 
