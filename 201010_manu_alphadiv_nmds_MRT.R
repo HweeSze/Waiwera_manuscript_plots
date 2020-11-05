@@ -5,7 +5,7 @@ library(dplyr)
 library(gridExtra)
 library(tidyverse)
 library(ggrepel)
-
+library(gtools)
 ###Read in files:
 rar<-read.delim("rar.filt.sintax.tab.otu-table.97.all.cov.norm.emirge.txt", row.names=1, header=T)
 map<-read.delim("mappingcomb.txt", row.names=1, header=T)
@@ -20,6 +20,15 @@ level<-c(rep("Freshwater",2),rep("Brackish",5),rep("Marine",2))
 level.comb<-factor(map$state,levels=c("Freshwater", "Brackish",   "Marine"))
 map$place_f = factor(map$place, levels=c('Water column','Sediments'))
 
+#filter bacteria,archaea, and microeukaryotes into different dataframe
+baconly<-srar %>% filter(Kingdom=="k:Bacteria")
+row.names(baconly)<-baconly$rowname
+
+archaea<-srar %>% filter(Kingdom=="k:Archaea")
+row.names(archaea)<-archaea$rowname
+
+eukonly<-srar %>% filter(Kingdom=="k:Eukaryota")
+row.names(eukonly)<-eukonly$rowname
 
 # Alpha diversity
 ## Shannon indices for all, microeukaryotes, bacteria and  archaea
@@ -124,6 +133,7 @@ vector1<-mutate(mds.plot$vector,efsrar$vectors$pvals)
 vector1<-filter(vector1,efsrar$vectors$pvals<=0.05)
 row.names(vector1)<- vector1$vector
 
+pdf("nmds_community.pdf",colormodel="cmyk",width=7,height=5,paper='special')
 ggplot(data = mds.plot[["points"]],
        mapping = aes(x = NMDS1, y = NMDS2)) +
     geom_point(mapping = aes(shape = place, colour = salinity),
@@ -140,7 +150,7 @@ ggplot(data = mds.plot[["points"]],
     axis.text=element_text(color = "black",size=12),axis.title=element_text(color = "black",size=13),
     legend.text=element_text(size=12),panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ 
     scale_y_reverse()+ scale_x_continuous(limits = c(-0.9,0.9))
-
+dev.off()
 
 ## Multivariate regression tree
 library(mvpart)

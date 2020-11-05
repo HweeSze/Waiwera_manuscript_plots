@@ -42,7 +42,7 @@ BCI.decay.pow<-decay.model(dissimilarity_Filter, fil_dist_matrix, y.type="dissim
 new_fil<-BCI.decay.exp$data
 colnames(new_fil) <-c("x","y")
 fit_fil<-(glm(x ~ y, data=new_fil, family = "gaussian"))
-filter_r2<-PseudoR2(fit,which = "Nagelkerke")
+filter_r2<-PseudoR2(fit_fil,which = "Nagelkerke")
 summary(fit_fil)
 filter_p<-1.752e-07
 fil_slope<-BCI.decay.pow$b.slope
@@ -78,10 +78,13 @@ new_all<-mutate(new_all,type=c(rep("Filter",36),rep("Sediment",351)))
 
 ##test significance of covariance (analysis of covariance ancova)
 anova((lm(y~x*type+x:type,data=new_all)))
+inter<-((lm(y~x*type,data=new_all)))
+inter$coefficients
 inter.lst<-lstrends(inter,"type",var="x")
 pairs(inter.lst)
 
 #plot
+pdf("distance_decay_community_plot.pdf",width=8,height=6)
 pal<-iwanthue(6)
 ggplot(new_all, aes(x, y))+ ylim(0,1.2)+ 
   geom_point(data=new_all[grep("Sediment",new_all$type), ],colour="black",shape=1,size=4) +
@@ -99,3 +102,4 @@ ggplot(new_all, aes(x, y))+ ylim(0,1.2)+
   geom_text(aes(x=1.3,y=0.1,label = paste("Water Column GLM Adj R2 = ",signif(filter_r2, 5),"\nGLM P-value =",signif(filter_p, 5),"\nGLM slope =",signif(fil_slope, 5))))+
   scale_colour_manual(name="legend", values=pal)+
   labs(shape = "Type", colour = "Line colour")
+dev.off()

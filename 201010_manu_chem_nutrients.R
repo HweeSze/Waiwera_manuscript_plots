@@ -12,7 +12,7 @@ library(gridExtra)
 library(reshape2)
 library(lemon)
 
-chem<-read.delim("191115_waiwera_chem.txt",header = T,row.names = 1)
+chem<-read.delim("waiwera_chem.txt",header = T,row.names = 1)
 chem$Distance<-as.character(chem$Distance)
 
 chem2<-chem %>% 
@@ -54,7 +54,11 @@ grid_arrange_shared_legend(p,arrangeGrob(q,heights = c(0.64,0.36),widths=c(0.65)
 dev.off()
 
 #ZOOM IN AMMONIUM 
-ggplot(NH4[9:16,], aes(x=group, y=mean))+ theme_bw() + 
+NH4<-chem[25:48,] %>% # the names of the new data frame and the data frame to be summarised
+  group_by(group) %>%   # the grouping variable
+  ddply(.(group), summarize,  mean=mean(NH4), sd=sd(NH4))
+
+ggplot(NH4, aes(x=group, y=mean))+ theme_bw() + 
     geom_bar(position=position_dodge(), stat="identity",fill="#2bb45b") +
     geom_errorbar(aes(ymin=mean-sd,ymax=mean+sd),width=.2,  position=position_dodge(.9))+
     theme(legend.position=c(0.9,0.15),legend.title = element_text(size=23),
