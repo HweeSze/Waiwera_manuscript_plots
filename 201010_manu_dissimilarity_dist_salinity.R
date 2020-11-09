@@ -103,3 +103,9 @@ ggplot(new_all, aes(x, y))+ ylim(0,1.2)+
   scale_colour_manual(name="legend", values=pal)+
   labs(shape = "Type", colour = "Line colour")
 dev.off()
+
+
+## Mantel test
+mantel(dissimilarity_community, dissimilarity_wgs, method = "spearman", permutations = 9999, na.rm = TRUE)
+mantel(dissimilarity_community[1:30,1:30], dissimilarity_wts, method = "spearman", permutations = 9999, na.rm = TRUE)
+mantel(dissimilarity_wts[1:30,1:30], dissimilarity_wgs[1:30,1:30], method = "spearman", permutations = 9999, na.rm = TRUE)

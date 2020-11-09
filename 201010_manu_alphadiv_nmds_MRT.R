@@ -37,6 +37,7 @@ shannonrar_bac<- data.frame(x=colnames(baconly[1:36]),Y=diversity(t(baconly[, 1:
 shannonrar_eu<- data.frame(x=colnames(eukonly[1:36]),Y=diversity(t(eukonly[, 1:36]) ,index="shannon"))
 shannonrar_arc<- data.frame(x=colnames(archaea[1:36]),Y=diversity(t(archaea[, 1:36]) ,index="shannon"))
 
+
 #set color
 pal <- c("#b4ecf9", "#1e79da", "#0a0c93")
 
@@ -104,6 +105,26 @@ spe_b<-ggplot(spec_bac, aes(x = level.comb, y = Y)) +
 pdf("alphadiv_all_boxplot.point.pdf",colormodel="cmyk",width=22,height=7,paper='special')
 grid.arrange(div_all, div_ar, div_b, div_e, spe_all, spe_ar, spe_b, spe_e, ncol=4)
 dev.off()
+
+
+# Wilcoxon test between water and sediment alpha diversity
+wilcox.test( shannonrar$Y~place,
+              data = map)
+wilcox.test( specrichness$y~place,
+             data = map)
+wilcox.test( shannonrar_bac$Y~place,
+              data = map)
+wilcox.test( shannonrar_eu$Y~place,
+             data = map)
+wilcox.test( shannonrar_arc$Y~place,
+              data = map)
+wilcox.test( spec_arc$Y~place,
+             data = map)
+wilcox.test( spec_bac$Y~place,
+             data = map)
+wilcox.test( spec_eu$Y~place,
+             data = map)
+
 
 ##Non-multidimensional analysis
 ###3. Create ordination
@@ -182,3 +203,28 @@ mvpart_run2 <- mvpart(
 )
 
 
+#pairwise ANOVA 
+library(pairwiseAdonis)
+set.seed(1234)
+pairwise.adonis(t(srar[,1:36]),map$comb,p.adjust.m="BH",perm=999)
+
+
+
+#BIOENV to identify environmental variables that best correlate with community data
+corr_fil_all <- bioenv(t(srar[,c(1,2,4:9)]) ~ Temp+salinity+Ammonium+Nitrite+Nitrate+ DRP ,map[c(1,2,4:9),], method="spearman")
+corr_fil_bac <- bioenv(t(baconly[,c(1,2,4:9)]) ~   Temp+salinity+Ammonium+Nitrite+Nitrate+ DRP ,map[c(1,2,4:9),], method="spearman")
+corr_fil_euk <- bioenv(t(eukonly[,c(1,2,4:9)]) ~  Temp+salinity+Ammonium+Nitrite+Nitrate+ DRP ,map[c(1,2,4:9),], method="spearman")
+corr_fil_arc <- bioenv(t(archaea[,c(1,2,4:9)]) ~  Temp+salinity+Ammonium+Nitrite+Nitrate+ DRP ,map[c(1,2,4:9),], method="spearman")
+summary(corr_fil_all)
+summary(corr_fil_bac)
+summary(corr_fil_euk)
+summary(corr_fil_arc)
+
+corr_sed_all <- bioenv(t(srar[,c(10:15,19:36)]) ~ salinity+Ammonium+Nitrite+Nitrate+Mud.content+ DRP+ DNPOC+TOC+TS+TRP ,map[c(10:15,19:36),], method="spearman")
+corr_sed_bac <- bioenv(t(baconly[,c(10:15,19:36)]) ~ salinity+Ammonium+Nitrite+Nitrate+Mud.content+ DRP+ DNPOC+TOC+TS+TRP ,map[c(10:15,19:36),], method="spearman")
+corr_sed_euk <- bioenv(t(eukonly[,c(10:15,19:36)]) ~ salinity+Ammonium+Nitrite+Nitrate+Mud.content+ DRP+ DNPOC+TOC+TS+TRP ,map[c(10:15,19:36),], method="spearman")
+corr_sed_arc <- bioenv(t(archaea[,c(10:15,19:36)]) ~ salinity+Ammonium+Nitrite+Nitrate+Mud.content+ DRP+ DNPOC+TOC+TS+TRP ,map[c(10:15,19:36),], method="spearman")
+summary(corr_sed_all)
+summary(corr_sed_bac)
+summary(corr_sed_euk)
+summary(corr_sed_arc)

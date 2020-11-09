@@ -424,3 +424,15 @@ p9=set_panel_size(a9,width = unit(5.5, "cm"),height = unit(5.5, "cm"))
 pdf("comb_taxa_function_barplot.pdf",width=18,height=32)
 marrangeGrob(grobs=list(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10),  nrow = 1,ncol = 1)
 dev.off()
+
+
+##CORRELATIONS BETWEEN THIOSULFATE AND SULFATE CONCENTRATION
+thiosulfate_oxidation=taxa_wts_all %>% filter(Specific.pathway=="Thiosulfate_oxidation") %>%select(f1:S7R3) %>% colSums()
+cor(as.numeric(as.character(map[1:9,17])),thiosulfate_oxidation[1:9],method="spearman")
+#0.8451957
+
+##CORRELATIONS BETWEEN PHOSPHATE UPTAKE AND PHOSPHATE CONCENTRATION
+PHOSPHATE=taxa_wts_all[grep("Phosphate Specific Transport System|Phosphate Inorganic Transporter|Phosphate Regulon",taxa_wts_all$Specific.pathway), ] %>%select(f1:S7R3) %>% colSums()
+cor(as.numeric(as.character(map[1:9,17])),PHOSPHATE[1:9],method="spearman")
+#-0.4937282
+
